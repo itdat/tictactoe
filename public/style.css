@@ -1,0 +1,44 @@
+#board {
+  height: 45vh;
+  width: 45vh;
+  background: url("/grid.svg") no-repeat;
+  border-radius: 20px;
+}
+
+.board-item {
+  height: 15vh;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-item img {
+  width: 80%;
+}
+
+.board-item img:hover {
+  width: 90%;
+  transition-duration: 100ms;
+}
+
+.board-item:hover {
+  transition-duration: 500ms;
+}
+
+.scores {
+  border-radius: 25px;
+  padding: 0.2rem 1rem;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 540px) {
+  #board {
+    width: 90vw;
+    height: 90vw;
+  }
+
+  .board-item {
+    height: 30vw;
+  }
+}
