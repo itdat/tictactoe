@@ -15,7 +15,7 @@ function App() {
       </header>
 
       <section id="main-content">
-        <Board />
+        <Board size={10} />
       </section>
     </React.Fragment>
   );

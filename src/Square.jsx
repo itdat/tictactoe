@@ -1,12 +1,11 @@
 import React from "react";
-function Square(props) {
+function Square({ value, onClick }) {
   let imgTag = "";
-  if (props.value != null) {
-    imgTag = <img src={`/${props.value}.svg`} />;
+  if (value != null) {
+    imgTag = <img src={`/${value}.svg`} />;
   }
-
   return (
-    <div className="board-item col-4" onClick={props.onClick}>
+    <div className="board-item" onClick={onClick}>
       {imgTag}
     </div>
   );
