@@ -53,7 +53,7 @@ const calculateWinner = (squares, winSteps, index, player) => {
   i = x;
   j = y;
   count = 0;
-  while (i >= 0 && j < 0 && squares[j * size + i] === player) {
+  while (i >= 0 && j < size && squares[j * size + i] === player) {
     ++count;
     --i;
     ++j;
@@ -65,6 +65,7 @@ const calculateWinner = (squares, winSteps, index, player) => {
     ++i;
     --j;
   }
+  console.log(`x = ${x}, y = ${y}, count = ${count}`);
   if (count === winSteps) return true;
 
   return false;
