@@ -6,56 +6,59 @@ import { calculateWinner } from "./Calculation";
 class Game extends React.Component {
   constructor(props) {
     super(props);
-
-    // Default state
     this.state = {
       size: 3,
-      history: [{ squares: Array(9).fill(null) }],
-      moves: [],
+      history: [
+        {
+          squares: Array(9).fill(null),
+          winner: null,
+          winMoves: [],
+          move: null,
+        },
+      ],
       stepNumber: 0,
       xIsNext: true,
-      winner: null,
-      winMoves: [],
       winSteps: 3,
       isAsc: false,
     };
   }
 
-  handleClick = (i) => {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-    if (this.state.winner || squares[i]) {
+  handleCellClick = (i) => {
+    const { size, winSteps, history, stepNumber, xIsNext } = this.state;
+    const current = history.slice(0, stepNumber + 1).reverse()[0];
+    const player = xIsNext ? "x" : "o";
+
+    const newSquares = [...current.squares];
+    if (current.winner || newSquares[i]) {
       return;
     }
+    newSquares[i] = player;
+    const move = { x: i % size, y: Math.floor(i / size) };
+    const winMoves = calculateWinner(newSquares, winSteps, i, player);
+    const winner = winMoves.length !== 0 ? player : null;
 
-    const moves = this.state.moves.slice(0, this.state.stepNumber);
-    moves.push({ x: i % Math.sqrt(squares.length), y: Math.floor(i / Math.sqrt(squares.length)) });
-
-    const player = this.state.xIsNext ? "x" : "o";
-    squares[i] = player;
-    const winMoves = calculateWinner(squares, this.state.winSteps, i, player);
-    let winner = winMoves.length !== 0 ? player : null;
+    const droppedHistory = history.slice(0, stepNumber + 1);
     this.setState({
-      history: history.concat([
+      history: [
+        ...droppedHistory,
         {
-          squares: squares,
+          squares: newSquares,
+          winner,
+          winMoves,
+          move,
         },
-      ]),
-      moves: moves,
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
-      winner: winner,
-      winMoves: winMoves,
+      ],
+      stepNumber: droppedHistory.length,
+      xIsNext: !xIsNext,
     });
   };
 
   jumpTo(step) {
-    if (step !== this.state.stepNumber) {
+    const { stepNumber } = this.state;
+    if (step !== stepNumber) {
       this.setState({
         stepNumber: step,
         xIsNext: step % 2 === 0,
-        winner: null,
       });
     }
   }
@@ -64,69 +67,46 @@ class Game extends React.Component {
     this.setState({ ...this.state, isAsc: !this.state.isAsc });
   };
 
-  handleChange = (event) => {
-    const newSize = parseInt(event.target.value);
+  handleChangeGameSize = (e) => {
+    const newSize = parseInt(e.target.value);
     this.setState({
       ...this.state,
       size: newSize,
-      history: [{ squares: Array(newSize * newSize).fill(null) }],
-      winSteps: newSize < 5 ? newSize : 5,
-      moves: [],
+      history: [
+        {
+          squares: Array(newSize * newSize).fill(null),
+          winner: null,
+          winMoves: [],
+          move: null,
+        },
+      ],
       stepNumber: 0,
       xIsNext: true,
-      winner: null,
-      winMoves: [],
+      winSteps: newSize < 5 ? newSize : 5,
       isAsc: false,
     });
   };
 
   render() {
-    const { size, history, isAsc, moves, stepNumber } = this.state;
-    const squares = [...history[this.state.stepNumber].squares];
-    let status;
-    let player;
-    if (this.state.winner) {
-      status = "Winner: ";
-      player = (
-        <img className="align-middle" height="30px" src={`./${this.state.winner}.svg`} alt={this.state.winner} />
-      );
-    } else {
-      let count = 0;
-      squares.forEach((square) => {
-        if (square != null) {
-          count++;
-        }
-      });
-      if (count === size * size) {
-        status = "No winner!";
-        player = null;
-      } else {
-        status = "Next Player: ";
-        player = (
-          <img
-            className="align-middle"
-            height="30px"
-            src={`./${this.state.xIsNext ? "x" : "o"}.svg`}
-            alt={this.state.xIsNext ? "x" : "o"}
-          />
-        );
-      }
-    }
+    const { size, history, isAsc, stepNumber, xIsNext } = this.state;
+    const current = { ...history[stepNumber] };
+    const squares = [...current.squares];
+    const checkedCells = squares.reduce((count, square) => count + (square !== null ? 1 : 0), 0);
 
-    let moveList = history.map((step, move, array) => {
-      let desc = "";
-      if (isAsc) {
-        desc = move ? `Go to move (${moves[move - 1].x},${moves[move - 1].y})` : "Go to game start";
-      } else {
-        desc =
-          move !== array.length - 1
-            ? `Go to move (${moves[array.length - move - 2].x},${moves[array.length - move - 2].y})`
-            : "Go to game start";
-      }
+    const status = current.winner ? "Winner: " : checkedCells < size * size ? "Next player: " : "No winner!";
+    const player = current.winner ? current.winner : checkedCells < size * size ? (xIsNext ? "x" : "o") : "";
+    const playerImg =
+      player !== "" ? <img className="align-middle" height="30px" src={`./${player}.svg`} alt={player} /> : null;
 
+    const historyCopy = isAsc ? [...history] : [...history].reverse();
+    const moves = historyCopy.map((record, i) => {
+      const desc =
+        (isAsc && i === 0) || (!isAsc && i === historyCopy.length - 1)
+          ? "Go to game start"
+          : `Go to move (${record.move.x}, ${record.move.y})`;
       const fontWeightBold =
-        (isAsc && move === stepNumber) || (!isAsc && array.length - move - 1 === stepNumber) ? "font-weight-bold" : "";
-      const targetMove = isAsc ? move : array.length - move - 1;
+        (isAsc && i === stepNumber) || (!isAsc && i === historyCopy.length - stepNumber - 1) ? "font-weight-bold" : "";
+      const targetMove = isAsc ? i : historyCopy.length - i - 1;
       return (
         <button
           key={targetMove}
@@ -150,7 +130,7 @@ class Game extends React.Component {
                 <label className="text-white" htmlFor="gameSize">
                   Select size
                 </label>
-                <select className="form-control" id="gameSize" onChange={this.handleChange}>
+                <select className="form-control" id="gameSize" onChange={this.handleChangeGameSize}>
                   <option>3</option>
                   <option>5</option>
                   <option>7</option>
@@ -167,15 +147,15 @@ class Game extends React.Component {
             <div className="d-flex align-items-center justify-content-center my-3">
               <h3 className="mb-0">
                 <span className="align-middle">{status}</span>
-                {player}
+                {playerImg}
               </h3>
             </div>
             <div id="game-wrapper">
-              <Board winMoves={this.state.winMoves} squares={squares} onClick={this.handleClick} />
+              <Board winMoves={current.winMoves} squares={squares} onClick={this.handleCellClick} />
               <div id="info" className="">
                 <ReverseButton title={this.state.isAsc ? "Ascending" : "Descending"} onClick={this.reverseSort} />
                 <div id="moves" className="">
-                  {moveList}
+                  {moves}
                 </div>
               </div>
             </div>
@@ -185,9 +165,5 @@ class Game extends React.Component {
     );
   }
 }
-
-Game.defaultProps = {
-  size: 10,
-};
 
 export default Game;
