@@ -13,6 +13,7 @@ class Game extends React.Component {
       stepNumber: 0,
       xIsNext: true,
       winner: null,
+      winMoves: [],
       winSteps: size <= 5 ? size : 5,
       isAsc: true,
     };
@@ -31,7 +32,8 @@ class Game extends React.Component {
 
     const player = this.state.xIsNext ? "x" : "o";
     squares[i] = player;
-    let winner = calculateWinner(squares, this.state.winSteps, i, player) ? player : null;
+    const winMoves = calculateWinner(squares, this.state.winSteps, i, player);
+    let winner = winMoves.length !== 0 ? player : null;
     this.setState({
       history: history.concat([
         {
@@ -42,6 +44,7 @@ class Game extends React.Component {
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
       winner: winner,
+      winMoves: winMoves,
     });
   };
 
@@ -59,7 +62,7 @@ class Game extends React.Component {
 
   render() {
     const { size } = this.props;
-    const { history } = this.state;
+    const { history, isAsc, moves } = this.state;
     const squares = [...history[this.state.stepNumber].squares];
     let status;
     let player;
@@ -91,37 +94,28 @@ class Game extends React.Component {
       }
     }
 
-    let moves = null;
-    if (this.state.isAsc) {
-      moves = history.map((step, move) => {
-        const desc = move
-          ? `Go to move (${this.state.moves[move - 1].x},${this.state.moves[move - 1].y})`
-          : "Go to game start";
-        return (
-          <button key={move} className="btn btn-block btn-outline-secondary" onClick={() => this.jumpTo(move)}>
-            {desc}
-          </button>
-        );
-      });
-    } else {
-      moves = history.map((step, move, array) => {
-        const desc =
+    let moveList = history.map((step, move, array) => {
+      let desc = "";
+      if (isAsc) {
+        desc = move ? `Go to move (${moves[move - 1].x},${moves[move - 1].y})` : "Go to game start";
+      } else {
+        desc =
           move !== array.length - 1
-            ? `Go to move (${this.state.moves[array.length - move - 2].x},${
-                this.state.moves[array.length - move - 2].y
-              })`
+            ? `Go to move (${moves[array.length - move - 2].x},${moves[array.length - move - 2].y})`
             : "Go to game start";
-        return (
-          <button
-            key={array.length - move - 1}
-            className="btn btn-block btn-outline-secondary"
-            onClick={() => this.jumpTo(array.length - move - 1)}
-          >
-            {desc}
-          </button>
-        );
-      });
-    }
+      }
+
+      const targetMove = isAsc ? move : array.length - move - 1;
+      return (
+        <button
+          key={targetMove}
+          className="btn btn-block btn-outline-secondary"
+          onClick={() => this.jumpTo(targetMove)}
+        >
+          {desc}
+        </button>
+      );
+    });
 
     return (
       <React.Fragment>
@@ -144,11 +138,11 @@ class Game extends React.Component {
               </h3>
             </div>
             <div id="game-wrapper">
-              <Board squares={squares} onClick={this.handleClick} />
+              <Board winMoves={this.state.winMoves} squares={squares} onClick={this.handleClick} />
               <div id="info" className="">
                 <ReverseButton title={this.state.isAsc ? "Ascending" : "Descending"} onClick={this.reverseSort} />
                 <div id="moves" className="">
-                  {moves}
+                  {moveList}
                 </div>
               </div>
             </div>

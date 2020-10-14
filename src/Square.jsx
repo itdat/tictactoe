@@ -1,8 +1,8 @@
 import React from "react";
-function Square({ value, onClick }) {
+function Square({ isWinMove, value, onClick }) {
   let imgTag = "";
   if (value != null) {
-    imgTag = <img src={`/${value}.svg`} alt={value} />;
+    imgTag = <img className={isWinMove ? "win-move" : ""} src={`/${value}.svg`} alt={value} />;
   }
   return (
     <div className="board-item" onClick={onClick}>
