@@ -6,16 +6,18 @@ import { calculateWinner } from "./Calculation";
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    const { size } = props;
+
+    // Default state
     this.state = {
-      history: [{ squares: Array(size * size).fill(null) }],
+      size: 3,
+      history: [{ squares: Array(9).fill(null) }],
       moves: [],
       stepNumber: 0,
       xIsNext: true,
       winner: null,
       winMoves: [],
-      winSteps: size <= 5 ? size : 5,
-      isAsc: true,
+      winSteps: 3,
+      isAsc: false,
     };
   }
 
@@ -60,9 +62,24 @@ class Game extends React.Component {
     this.setState({ ...this.state, isAsc: !this.state.isAsc });
   };
 
+  handleChange = (event) => {
+    const newSize = parseInt(event.target.value);
+    this.setState({
+      ...this.state,
+      size: newSize,
+      history: [{ squares: Array(newSize * newSize).fill(null) }],
+      winSteps: newSize < 5 ? newSize : 5,
+      moves: [],
+      stepNumber: 0,
+      xIsNext: true,
+      winner: null,
+      winMoves: [],
+      isAsc: false,
+    });
+  };
+
   render() {
-    const { size } = this.props;
-    const { history, isAsc, moves } = this.state;
+    const { size, history, isAsc, moves, stepNumber } = this.state;
     const squares = [...history[this.state.stepNumber].squares];
     let status;
     let player;
@@ -105,11 +122,13 @@ class Game extends React.Component {
             : "Go to game start";
       }
 
+      const fontWeightBold =
+        (isAsc && move === stepNumber) || (!isAsc && array.length - move - 1 === stepNumber) ? "font-weight-bold" : "";
       const targetMove = isAsc ? move : array.length - move - 1;
       return (
         <button
           key={targetMove}
-          className="btn btn-block btn-outline-secondary"
+          className={`btn btn-block btn-outline-secondary ${fontWeightBold}`}
           onClick={() => this.jumpTo(targetMove)}
         >
           {desc}
@@ -124,6 +143,18 @@ class Game extends React.Component {
             <div className="container">
               <div className="navbar-brand">
                 <h3>TicTacToe</h3>
+              </div>
+              <div className="form-group">
+                <label className="text-white" htmlFor="gameSize">
+                  Select size
+                </label>
+                <select className="form-control" id="gameSize" onChange={this.handleChange}>
+                  <option>3</option>
+                  <option>5</option>
+                  <option>7</option>
+                  <option>10</option>
+                  <option>20</option>
+                </select>
               </div>
             </div>
           </div>
