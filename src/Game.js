@@ -51,11 +51,13 @@ class Game extends React.Component {
   };
 
   jumpTo(step) {
-    this.setState({
-      stepNumber: step,
-      xIsNext: step % 2 === 0,
-      winner: null,
-    });
+    if (step !== this.state.stepNumber) {
+      this.setState({
+        stepNumber: step,
+        xIsNext: step % 2 === 0,
+        winner: null,
+      });
+    }
   }
 
   reverseSort = () => {
