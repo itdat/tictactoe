@@ -1,5 +1,5 @@
 import React from "react";
-function Square({ isWinMove, value, onClick }) {
+const Square = ({ isWinMove, value, onClick }) => {
   let imgTag = "";
   if (value != null) {
     imgTag = <img className={isWinMove ? "win-move" : ""} src={`/${value}.svg`} alt={value} />;
@@ -9,6 +9,6 @@ function Square({ isWinMove, value, onClick }) {
       {imgTag}
     </div>
   );
-}
+};
 
 export default Square;

@@ -12,8 +12,4 @@ const Board = ({ winMoves, squares, onClick }) => {
   );
 };
 
-Board.defaultProps = {
-  size: 3,
-};
-
 export default Board;
