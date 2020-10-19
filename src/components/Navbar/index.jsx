@@ -14,8 +14,8 @@ const Navbar = ({ title, options, onChangeGameSize }) => {
               Select size
             </label>
             <select className="form-control" id="gameSize" onChange={onChangeGameSize}>
-              {options.map((option) => (
-                <option>{option}</option>
+              {options.map((option, i) => (
+                <option key={i}>{option}</option>
               ))}
             </select>
           </div>
