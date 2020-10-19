@@ -6,7 +6,7 @@ URL: [https://tictactoe-v210.netlify.app](https://tictactoe-v210.netlify.app).
 
 This is a exercise about using React for newbie that follows instructions from [https://reactjs.org/tutorial/tutorial.html](https://reactjs.org/tutorial/tutorial.html).
 
-## How to install
+## Usage
 
 After you clone this directory:
 
